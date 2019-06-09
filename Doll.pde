@@ -60,6 +60,9 @@ class Doll{
         // record walked
         walked[col][row] = true;
       }
+      if(hitOpen()){
+        walked[col][row] = true;
+      }
       
       
   }
@@ -136,7 +139,15 @@ class Doll{
   }
   
   boolean hitLimb(){
-    if(hitDetection(3) || hitDetection(7) || hitDetection(8)){
+    if(hitDetection(7) || hitDetection(8)){
+      return true;
+    }else{
+      return false;
+    }
+  }
+  
+  boolean hitOpen(){
+    if(hitDetection(3)){
       return true;
     }else{
       return false;
