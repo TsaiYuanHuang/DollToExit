@@ -28,17 +28,10 @@ class Doll{
       
       int col = (int)x/BRICK_SIZE;
       int row = (int)y/BRICK_SIZE;
+       
+     
       
-      walked[col][row] = true;
-      for( int i=0; i<walked.length; i++){
-        for( int j=0; j<walked.length; j++){
-          if(walked[i][j] == true){
-            //println(i,j);
-          }
-        }
-      }
-      
-      
+      // hit fire
       if(hitFire() == true){
         life -- ;
         if(gameState == 2){
@@ -55,11 +48,22 @@ class Doll{
           y = 14*BRICK_SIZE;
         }
         downState = true;
+        
+        if(life <= 0){
+          gameState = GAME_LOSE;
+        }
       }
-
-      openExit();
-    
+      
+      // hit limb
+      if(hitLimb()){
+        limbNum--;
+        // record walked
+        walked[col][row] = true;
+      }
+      
+      
   }
+  
   
   void display(){
     if(gameState == 2){
@@ -103,26 +107,28 @@ class Doll{
 
   }
   
-  void openExit(){
-    
-    /*if(rightState){
-      if(limbNum != 0){
-        if(hitDetection(5)){
-          xSpeed = 0;
+  void changeGamestate(){
+    if(gameState == 2){
+        if((x > 550 && x < 600) && (y >= 250 && y <= 300)){
+          gameState = GAME_PR_2;
         }
-      }else{
-        xSpeed = 5;
-      }
     }
-    if(leftState){
-      xSpeed = 5;
-    }*/
-    //println(limbNum);
-    
+    if(gameState == 4){
+       if((x > 650 && x < 700) && (y >= 150 && y <= 200)){
+          gameState = GAME_PR_3;
+        }
+    }
+    if(gameState == 6){
+       if((x > 650 && x < 700) && (y >= 150 && y <= 200)){
+          gameState = GAME_WIN;
+        }
+    }
   }
   
+
+  
   boolean hitFire(){
-    if(hitDetection(6) == true){
+    if(hitDetection(6)){
       return true;
     }else{
       return false;
@@ -130,47 +136,22 @@ class Doll{
   }
   
   boolean hitLimb(){
-    if(hitDetection(7) == true || hitDetection(8) == true){
-      limbNum--;
+    if(hitDetection(3) || hitDetection(7) || hitDetection(8)){
       return true;
     }else{
       return false;
     }
   }
   
-  
-  boolean hitDetection(int num){
+ boolean hitDetection(int num){
     int col = (int)x/BRICK_SIZE;
     int row = (int)y/BRICK_SIZE;
     boolean isHit = false;
     
-        // down
-        if((brickHealth[col][row+1] == num)){
-          if((row+1)*BRICK_SIZE <= y+size){
-            isHit = true;
-          }
+        if(brickHealth[col][row] == num){
+          isHit=true;
         }
         
-        // up
-        if((brickHealth[col][row-1] == num)){
-          if(row*BRICK_SIZE >= y){
-            isHit = true;
-          }
-        }
-        
-        // left
-        if((brickHealth[col-1][row] == num)){
-          if(col*BRICK_SIZE >= x){
-            isHit = true;
-          }
-        }
-        
-        // right
-        if((brickHealth[col+1][row] == num)){
-          if((col+1)*BRICK_SIZE <= x+size){
-            isHit = true;
-          }
-        }
     return isHit;
   }
   
@@ -185,17 +166,17 @@ class Doll{
         
         float currentySpeed = ySpeed;
         float currentxSpeed = xSpeed;
-        if(brickHealth[col][row+1] == 1 || brickHealth[col][row+1] == 2){
+        if(brickHealth[col][row+1] == 1 || brickHealth[col][row+1] == 2 || brickHealth[col][row+1] == 4){
           if((row+1)*BRICK_SIZE <= y+size){
             currentySpeed = 0;
           }
         }
-        if(brickHealth[col-1][row] == 1 || brickHealth[col-1][row] == 2){
+        if(brickHealth[col-1][row] == 1 || brickHealth[col-1][row] == 2 || brickHealth[col-1][row] == 4){
           if(col*BRICK_SIZE >= x){
             currentxSpeed = 0;
           }
         }
-        if(brickHealth[col+1][row] == 1 || brickHealth[col+1][row] == 2){
+        if(brickHealth[col+1][row] == 1 || brickHealth[col+1][row] == 2 || brickHealth[col+1][row] == 4){
           if((col+1)*BRICK_SIZE <= x+size){
             currentxSpeed = 0;
           }
@@ -204,17 +185,17 @@ class Doll{
         // mid
         if( x%BRICK_SIZE + size > BRICK_SIZE){
           col += 1;
-          if(brickHealth[col][row+1] == 1 || brickHealth[col][row+1] == 2){
-            if((row+1)*BRICK_SIZE <= y+size){
+          if(brickHealth[col][row+1] == 1 || brickHealth[col][row+1] == 2 || brickHealth[col][row+1] == 4){
+            if((row+1)*BRICK_SIZE <= y+size+currentySpeed){
               currentySpeed = 0;
             }
           }
-          if(brickHealth[col-1][row] == 1 || brickHealth[col-1][row] == 2){
+          if(brickHealth[col-1][row] == 1 || brickHealth[col-1][row] == 2 || brickHealth[col-1][row] == 4){
             if(col*BRICK_SIZE >= x){
               currentxSpeed = 0;
             }
           }
-          if(brickHealth[col+1][row] == 1 || brickHealth[col-1][row] == 2){
+          if(brickHealth[col+1][row] == 1 || brickHealth[col-1][row] == 2 || brickHealth[col-1][row] == 4){
             if((col+1)*BRICK_SIZE <= x+size){
               currentxSpeed = 0;
             }
@@ -231,17 +212,17 @@ class Doll{
         
         float currentySpeed = ySpeed;
         float currentxSpeed = xSpeed;
-        if(brickHealth[col][row-1] == 1 || brickHealth[col][row-1] == 2){
+        if(brickHealth[col][row-1] == 1 || brickHealth[col][row-1] == 2 || brickHealth[col][row-1] == 4){
           if(row*BRICK_SIZE >= y){
             currentySpeed = 0;
           }
         }
-        if(brickHealth[col-1][row] == 1 || brickHealth[col-1][row] == 2){
+        if(brickHealth[col-1][row] == 1 || brickHealth[col-1][row] == 2 || brickHealth[col-1][row] == 4){
           if(col*BRICK_SIZE >= x){
             currentxSpeed = 0;
           }
         }
-        if(brickHealth[col+1][row] == 1 || brickHealth[col+1][row] == 2){
+        if(brickHealth[col+1][row] == 1 || brickHealth[col+1][row] == 2 || brickHealth[col+1][row] == 4){
           if((col+1)*BRICK_SIZE <= x+size){
             currentxSpeed = 0;
           }
@@ -250,17 +231,17 @@ class Doll{
         // mid
         if( x%BRICK_SIZE + size > BRICK_SIZE){
           col += 1;
-          if(brickHealth[col][row-1] == 1 || brickHealth[col][row-1] == 2){
-            if(row*BRICK_SIZE >= y){
+          if(brickHealth[col][row-1] == 1 || brickHealth[col][row-1] == 2 || brickHealth[col][row-1] == 4){
+            if(row*BRICK_SIZE >= y-currentySpeed){
               currentySpeed = 0;
             }
           }
-          if(brickHealth[col-1][row] == 1 || brickHealth[col-1][row] == 2){
+          if(brickHealth[col-1][row] == 1 || brickHealth[col-1][row] == 2 || brickHealth[col-1][row] == 4){
             if(col*BRICK_SIZE >= x){
               currentxSpeed = 0;
             }
           }
-          if(brickHealth[col+1][row] == 1 || brickHealth[col+1][row] == 2){
+          if(brickHealth[col+1][row] == 1 || brickHealth[col+1][row] == 2 || brickHealth[col+1][row] == 4){
             if((col+1)*BRICK_SIZE <= x+size){
               currentxSpeed = 0;
             }
@@ -277,18 +258,18 @@ class Doll{
         
         float currentySpeed = ySpeed;
         float currentxSpeed = xSpeed;
-        if(brickHealth[col][row+1] == 2){currentxSpeed *= 2;}
-        if(brickHealth[col-1][row] == 1 || brickHealth[col-1][row] == 2){
+        if(brickHealth[col][row+1] == 2 || brickHealth[col][row-1] == 2){currentxSpeed *= 2;}
+        if(brickHealth[col-1][row] == 1 || brickHealth[col-1][row] == 2 || brickHealth[col-1][row] == 4){
           if(col*BRICK_SIZE >= x){
             currentxSpeed = 0;
           }
         }
-        if(brickHealth[col][row-1] == 1 || brickHealth[col][row-1] == 2){
+        if(brickHealth[col][row-1] == 1 || brickHealth[col][row-1] == 2 || brickHealth[col][row-1] == 4){
           if(row*BRICK_SIZE >= y){
             currentySpeed = 0;
           }
         }
-        if(brickHealth[col][row+1] == 1 || brickHealth[col][row+1] == 2){
+        if(brickHealth[col][row+1] == 1 || brickHealth[col][row+1] == 2 || brickHealth[col][row+1] == 4){
           if((row+1)*BRICK_SIZE <= y+size){
             currentySpeed = 0;
           }
@@ -297,17 +278,17 @@ class Doll{
         // mid
         if( y%BRICK_SIZE + size > BRICK_SIZE){
           row += 1;
-          if(brickHealth[col-1][row] == 1 || brickHealth[col-1][row] == 2){
-            if(col*BRICK_SIZE >= x){
+          if(brickHealth[col-1][row] == 1 || brickHealth[col-1][row] == 2 || brickHealth[col-1][row] == 4){
+            if(col*BRICK_SIZE >= x-currentxSpeed){
               currentxSpeed = 0;
             }
           }
-          if(brickHealth[col][row-1] == 1 || brickHealth[col][row-1] == 2){
+          if(brickHealth[col][row-1] == 1 || brickHealth[col][row-1] == 2 || brickHealth[col][row-1] == 4){
             if(row*BRICK_SIZE >= y){
               currentySpeed = 0;
             }
           }
-          if(brickHealth[col][row+1] == 1 || brickHealth[col][row+1] == 2){
+          if(brickHealth[col][row+1] == 1 || brickHealth[col][row+1] == 2 || brickHealth[col][row+1] == 4){
             if((row+1)*BRICK_SIZE <= y+size){
               currentySpeed = 0;
             }
@@ -323,18 +304,18 @@ class Doll{
         
         float currentySpeed = ySpeed;
         float currentxSpeed = xSpeed;
-        if(brickHealth[col][row+1] == 2){currentxSpeed *= 2;}
-        if(brickHealth[col+1][row] == 1 || brickHealth[col+1][row] == 2){
+        if(brickHealth[col][row+1] == 2 || brickHealth[col][row-1] == 2){currentxSpeed *= 2;}
+        if(brickHealth[col+1][row] == 1 || brickHealth[col+1][row] == 2 || brickHealth[col+1][row] == 4 || brickHealth[col+1][row] == 5){
           if((col+1)*BRICK_SIZE <= x+size){
             currentxSpeed = 0;
           }
         }
-        if(brickHealth[col][row-1] == 1 || brickHealth[col][row-1] == 2){
+        if(brickHealth[col][row-1] == 1 || brickHealth[col][row-1] == 2 || brickHealth[col][row-1] == 4 || brickHealth[col][row-1] == 5){
           if(row*BRICK_SIZE >= y){
             currentySpeed = 0;
           }
         }
-        if(brickHealth[col][row+1] == 1 || brickHealth[col][row+1] == 2){ 
+        if(brickHealth[col][row+1] == 1 || brickHealth[col][row+1] == 2 || brickHealth[col][row+1] == 4 || brickHealth[col][row+1] == 5) { 
           if((row+1)*BRICK_SIZE <= y+size){
             currentySpeed = 0;
           }
@@ -343,42 +324,23 @@ class Doll{
         // mid
         if( y%BRICK_SIZE + size > BRICK_SIZE){
           row += 1;
-          if(brickHealth[col+1][row] == 1 || brickHealth[col+1][row] == 2){
+          if(brickHealth[col+1][row] == 1 || brickHealth[col+1][row] == 2 || brickHealth[col+1][row] == 4 || brickHealth[col][row+1] == 5){
             if((col+1)*BRICK_SIZE <= x+size){
               currentxSpeed = 0;
             }
           }
-          if(brickHealth[col][row-1] == 1 || brickHealth[col][row-1] == 2){
+          if(brickHealth[col][row-1] == 1 || brickHealth[col][row-1] == 2 || brickHealth[col][row-1] == 4 || brickHealth[col][row+1] == 5){
             if(row*BRICK_SIZE >= y){
               currentySpeed = 0;
             }
           }
-          if(brickHealth[col][row+1] == 1 || brickHealth[col][row+1] == 2){ 
+          if(brickHealth[col][row+1] == 1 || brickHealth[col][row+1] == 2 || brickHealth[col][row+1] == 4 || brickHealth[col][row+1] == 5){ 
             if((row+1)*BRICK_SIZE <= y+size){
               currentySpeed = 0;
             }
           }
         }
         
-        // fast brick
-       if(downState){
-          if(brickHealth[col+1][row] != 1 && brickHealth[col+1][row] != 2){
-            if(brickHealth[col][row+1] == 2){
-              currentxSpeed *= 2;
-            }else{
-              currentxSpeed = xSpeed;
-            }
-          }
-        }
-        if(!downState){
-          if(brickHealth[col+1][row] != 1 && brickHealth[col+1][row] != 2){
-            if(brickHealth[col][row-1] == 2){
-              currentxSpeed *= 2;
-            }else{
-              currentxSpeed = xSpeed;
-            }
-          }
-        }
           x+=currentxSpeed;
       }
   }
