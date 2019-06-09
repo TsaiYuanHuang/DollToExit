@@ -3,12 +3,13 @@ PImage[] doll = new PImage[3];
 PImage[] brick = new PImage[5];
 PImage leg,hand,fire;
 
+PFont font;
+
 Doll player;
 
 
 int[][] brickHealth = new int [16][16];
 boolean[][] walked = new boolean [16][16];
-
 
 /*
 health
@@ -110,7 +111,7 @@ void draw(){
         dollY = 9*BRICK_SIZE;
         player = new Doll(dollX,dollY);
         
-         
+        // choose map
         int count1 = floor(random(2));
         if(count1 == 1){
           run1_1();
@@ -125,48 +126,34 @@ void draw(){
       
       // game run
     if( mapDecide ){  
-      
-      
         if( mapNum == 1 ){
-        // hand/leg position
-        // run1-1 limb
-        if( limbNum == 4 ){ 
             limb1_1();
-          }
-          exit1();
+            exit1();
         }
+
         if( mapNum == 2 ){
-        // hand/leg position
-        // run1-2 limb
-        if( limbNum == 4 ){ 
             limb1_2();
-          }
-          exit1();
+            exit1();
         }
+
         // draw brick images 
         drawImage();
         
-      // player
+        // player
         player.display();
         player.move();
-        
-        
+        player.changeGamestate();
 
     }
+    popMatrix();
       
-      popMatrix();
-      
-      
-        if(key == 'b'){
-          gameState = GAME_PR_2;
-        }
-      
-      
+    if(key =='b'){
+      gameState =  GAME_PR_2;
+    }
       
     break;
     
     case GAME_PR_2:
-      if(key == 'b'){
         // decide run1 map
         mapDecide = false;
         // initialize limb number
@@ -175,9 +162,15 @@ void draw(){
         leftState = false;
         rightState = false;
         downState = true;
+        // init walked
+        for(int i=0; i<walked.length; i++){
+          for(int j=0; j<walked.length; j++){
+            walked[i][j] = false;
+         }
+        }
+        
         // change state
         gameState = GAME_RUN_2;
-      }
     break;
     
     case GAME_RUN_2:
@@ -191,9 +184,12 @@ void draw(){
      
       // decide map
       if( mapDecide == false ){
+        // init player
         dollX = 3*BRICK_SIZE;
         dollY = 12*BRICK_SIZE;
         player = new Doll(dollX,dollY);
+        
+        // choose map
         int count1 = floor(random(2));
         if(count1 == 1){
           run2_1();
@@ -210,21 +206,17 @@ void draw(){
       if( mapDecide == true){
         
         if( mapNum == 1 ){
-        // hand/leg position
-        // run2-1 limb
-        if( limbNum == 6 ){ 
-            limb2_1();
-          }
+          limb2_1();
           exit2();
+          open2_1();
+          door2_1();
         }
 
-        if( mapNum == 2 ){
-        // hand/leg position
-        // run2-2 limb
-        if( limbNum == 6 ){ 
-            limb2_2();
-          }
+        if( mapNum == 2 ){ 
+          limb2_2();
           exit2();
+          open2_2();
+          door2_2();
         }
 
         
@@ -234,18 +226,15 @@ void draw(){
         // draw doll
         player.display();
         player.move();
+        player.changeGamestate();
       }
       
       popMatrix();
       
-        if(key == 'c'){
-          gameState = GAME_PR_3;
-        }
       
     break;
     
     case GAME_PR_3:
-      if(key == 'c'){
         // decide run1 map
         mapDecide = false;
         // initialize limb number
@@ -254,9 +243,15 @@ void draw(){
         leftState = false;
         rightState = false;
         downState = true;
+        // init walked
+        for(int i=0; i<walked.length; i++){
+          for(int j=0; j<walked.length; j++){
+            walked[i][j] = false;
+         }
+        }
         // change state
         gameState = GAME_RUN_3;
-      }
+      
     break;
     
     case GAME_RUN_3:
@@ -273,6 +268,8 @@ void draw(){
         dollX = 1*BRICK_SIZE;
         dollY = 14*BRICK_SIZE;
         player = new Doll(dollX,dollY);
+        
+        // choose map
         int count1 = floor(random(2));
         if(count1 == 1){
           run3_1();
@@ -289,21 +286,17 @@ void draw(){
       if( mapDecide == true){
         
         if( mapNum == 1 ){
-        // hand/leg position
-        // run3-1 limb
-        if( limbNum == 8 ){ 
-            limb3_1();
-          }
+          limb3_1();
           exit3();
+          open3_1();
+          door3_1();
         }
 
         if( mapNum == 2 ){
-        // hand/leg position
-        // run3-2 limb
-        if( limbNum == 8 ){ 
-            limb3_2();
-          }
+          limb3_2();
           exit3();
+          open3_2();
+          door3_2();
         }
 
         // draw images
@@ -312,11 +305,10 @@ void draw(){
         // draw doll
         player.display();
         player.move();
+        player.changeGamestate();
       }
       
       popMatrix();
-  
-  
   
     break;
     
@@ -330,14 +322,6 @@ void draw(){
 
 
 
-boolean isHit(float ax, float ay, float aw, float ah, float bx, float by, float bw, float bh){
-  return  ax + aw > bx &&    // a right edge past b left
-        ax < bx + bw &&    // a left edge past b right
-        ay + ah > by &&    // a top edge past b bottom
-        ay < by + bh;
-}
-
-
 // maps
 // map1
 void run1_1(){
@@ -346,15 +330,14 @@ void run1_1(){
         brickHealth[i][j] = 0;
         
         // health 1: normal
-        if(i==4 || i==11) {if(j>=4 && j<12) brickHealth[i][j] = 1;}
         if(j==4 || j==11) {if(i>=4 && i<12) brickHealth[i][j] = 1;}
+        if(i==4) {if(j>=4 && j<12) brickHealth[i][j] = 1;}
+        if(i==11) {if(j==4 || (j>=6 &&  j<12)) brickHealth[i][j] = 1;}
         if(i==5 && j==5) brickHealth[i][j] = 1;
         if(i==6) {if(j==7 || j==8 || j==9) brickHealth[i][j] = 1;}
         if(i==7) {if(j==5 || j==7) brickHealth[i][j] = 1; }
         if(i==9) {if(j==5 || j==6 || j==8 || j==10) brickHealth[i][j] = 1;}
         if(i==10 && j==8) brickHealth[i][j] = 1;
-        
-
 
         
         // health 6: fire
@@ -372,8 +355,9 @@ void run1_2(){
         brickHealth[i][j] = 0;
         
         // health 1: normal
-        if(i==4 || i==11) {if(j>=4 && j<12) brickHealth[i][j] = 1;}
         if(j==4 || j==11) {if(i>=4 && i<12) brickHealth[i][j] = 1;}
+        if(i==4) {if(j>=4 && j<12) brickHealth[i][j] = 1;}
+        if(i==11) {if(j==4 || (j>=6 &&  j<12)) brickHealth[i][j] = 1;}
         if(i==5 && j==7) brickHealth[i][j] = 1;
         if(i==6) {if(j==5 || j==7 || j==9 || j==10) brickHealth[i][j] = 1;}
         if(i==8) {if(j==8 || j==10) brickHealth[i][j] = 1;}
@@ -393,14 +377,23 @@ void run1_2(){
 
 void exit1(){
   for(int i=0; i<brickHealth.length; i++){
-    for(int j=0; j<brickHealth.length; j++) {if(i==11 && j==5) brickHealth[i][j] = 5;}
+    for(int j=0; j<brickHealth.length; j++) {
+      if(limbNum <=0) {
+        brickHealth[11][5] = 0;
+        continue;
+      }else{
+      if(i==11 && j==5) brickHealth[i][j] = 5;
+      }
+      
+    }
   }
 }
+
 
 void limb1_1(){
   for(int i=0; i<brickHealth.length; i++){
               for(int j=0; j<brickHealth.length; j++){
-                //println(walked[i][j]);
+                
                 if(walked[i][j]){
                   brickHealth[i][j] = 0;
                   
@@ -410,6 +403,7 @@ void limb1_1(){
                 if(i==6 && j==5) brickHealth[i][j] = 7;
                 if(i==10){if(j==5 || j==10) brickHealth[i][j] = 7;}
               }
+              
   }
 }
 
@@ -418,7 +412,7 @@ void limb1_2(){
               for(int j=0; j<brickHealth.length; j++){
                 
                 if(walked[i][j]){
-                  brickHealth[i][j] = 0;
+                  brickHealth[i][j] = 0;      
                   
                   continue;
                 }
@@ -426,23 +420,11 @@ void limb1_2(){
                 if(i==9 && j==10) brickHealth[i][j] = 7;
                 if(i==10){if(j==6 || j==8) brickHealth[i][j] = 7;}
               }
+              
             }
 }
 
-void limb2_2(){
-  for(int i=0; i<brickHealth.length; i++){
-              for(int j=0; j<brickHealth.length; j++){
-                if(i==4) {if(j==4 || j==10) brickHealth[i][j] = 8;}
-                if(i==8 && j==6) brickHealth[i][j] = 8;
-                if(i==9) {if(j==3 || j==11) brickHealth[i][j] = 8;}
-                if(i==12 && j==5) brickHealth[i][j] = 8;
-                // open
-                if(i==12 && j==12) brickHealth[i][j] = 3;
-                // door
-                if(i==4 && j==8) brickHealth[i][j] = 4;
-              }
-            }
-}
+
 
 
 // map2
@@ -481,7 +463,7 @@ void run2_1(){
 void run2_2(){
   for(int i=0; i<brickHealth.length; i++){
       for(int j=0; j<brickHealth.length; j++){
-        brickHealth[i][j] = 0;
+        brickHealth[i][j] = 0;  
         
         // health 1: normal
         if(i==2 || i==13) {if(j>=2 && j<14) brickHealth[i][j] = 1;}
@@ -518,21 +500,91 @@ void run2_2(){
 
 void exit2(){
   for(int i=0; i<brickHealth.length; i++){
-    for(int j=0; j<brickHealth.length; j++) {if(i==13 && j==3) brickHealth[i][j] = 5;}
+    for(int j=0; j<brickHealth.length; j++) {
+      if(limbNum <=0) {
+        brickHealth[13][3] = 0;
+        continue;
+      }else{
+      if(i==13 && j==3) brickHealth[i][j] = 5;
+      }
+    }
+  }
+}
+
+void open2_1(){
+  for(int i=0; i<brickHealth.length; i++){
+    for(int j=0; j<brickHealth.length; j++){
+      if(walked[i][j]){
+        brickHealth[i][j] = 0;
+        continue;
+      }
+      if(i==3 && j==3) brickHealth[i][j] = 3;
+    }
+  }
+}
+
+void door2_1(){
+  for(int i=0; i<brickHealth.length; i++){
+    for(int j=0; j<brickHealth.length; j++){
+      if(brickHealth[3][3] == 0){
+        brickHealth[11][7] = 0;
+      }
+      if(i==11 && j==7) brickHealth[i][j] = 4;
+    }
+  }
+}
+
+void open2_2(){
+  for(int i=0; i<brickHealth.length; i++){
+    for(int j=0; j<brickHealth.length; j++){
+      if(walked[i][j]){
+        brickHealth[i][j] = 0;
+        continue;
+      }
+      if(i==12 && j==12) brickHealth[i][j] = 3;
+    }
+  }
+}
+
+void door2_2(){
+  for(int i=0; i<brickHealth.length; i++){
+    for(int j=0; j<brickHealth.length; j++){
+      if(brickHealth[12][12] == 0){
+        brickHealth[4][8] = 0;
+      }
+      if(i==4 && j==8) brickHealth[i][j] = 4;
+    }
   }
 }
 
 void limb2_1(){
   for(int i=0; i<brickHealth.length; i++){
               for(int j=0; j<brickHealth.length; j++){
+                if(walked[i][j]){
+                  brickHealth[i][j] = 0;
+                  
+                  continue;
+                }
                 if(i==3 && j==10) brickHealth[i][j] = 8;
                 if(i==6) {if(j==4 || j==12) brickHealth[i][j] = 8;}
                 if(i==7 && j==9) brickHealth[i][j] = 8;
                 if(i==11) {if(j==5 || j==11) brickHealth[i][j] = 8;}
-                // open 
-                if(i==3 && j==3) brickHealth[i][j] = 3;
-                // door
-                if(i==11 && j==7) brickHealth[i][j] = 4;
+              }
+            }
+}
+
+void limb2_2(){
+  for(int i=0; i<brickHealth.length; i++){
+              for(int j=0; j<brickHealth.length; j++){
+                if(walked[i][j]){
+                  brickHealth[i][j] = 0;
+                  
+                  continue;
+                }
+                if(i==4) {if(j==4 || j==10) brickHealth[i][j] = 8;}
+                if(i==8 && j==6) brickHealth[i][j] = 8;
+                if(i==9) {if(j==3 || j==11) brickHealth[i][j] = 8;}
+                if(i==12 && j==5) brickHealth[i][j] = 8;
               }
             }
 }
@@ -589,7 +641,7 @@ void run3_2(){
         if(i==1) {if(j==4 || j==11) brickHealth[i][j] = 1;}
         if(i==2) {if(j==6 || j==7 || j==9 || j==11 || j==13) brickHealth[i][j] = 1;}
         if(i==3) {if(j==4 || j==5 || j==6 || j==9 || j==10 || j==11 || j==13) brickHealth[i][j] = 1;}
-        if(i==4) {if(j==3 || j==4 || j==6 || j==7 || j==11 || j==14) brickHealth[i][j] = 1;}
+        if(i==4) {if(j==4 || j==6 || j==7 || j==11 || j==14) brickHealth[i][j] = 1;}
         if(i==5) {if(j==7 || j==8 || j==9 || j==13) brickHealth[i][j] = 1;} 
         if(i==6) {if(j==2 || j==3 || j==5 || j==9 || j==10 || j==12 || j==13) brickHealth[i][j] = 1;}
         if(i==7) {if(j==3 || j==5 || j==7 || j==8 || j==9 || j==10) brickHealth[i][j] = 1;}
@@ -616,22 +668,79 @@ void run3_2(){
 
 void exit3(){
   for(int i=0; i<brickHealth.length; i++){
-    for(int j=0; j<brickHealth.length; j++) {if(i==15 && j==1) brickHealth[i][j] = 5;}
+    for(int j=0; j<brickHealth.length; j++) {
+      if(limbNum <= 0){
+        brickHealth[15][1] = 0;
+        continue;
+      }
+      if(i==15 && j==1) {
+        brickHealth[i][j] = 5;
+      }
+    }
+  }
+}
+
+void open3_1(){
+  for(int i=0; i<brickHealth.length; i++){
+    for(int j=0; j<brickHealth.length; j++){
+      if(walked[i][j]){
+        brickHealth[i][j] = 0;
+        continue;
+      }
+      if(i==2 && j==10) brickHealth[i][j] = 3;
+    }
+  }
+}
+
+void door3_1(){
+  for(int i=0; i<brickHealth.length; i++){
+    for(int j=0; j<brickHealth.length; j++){
+      if(brickHealth[2][10] == 0){
+        brickHealth[11][3] = 0;
+      }
+      if(i==11 && j==3) brickHealth[i][j] = 4;
+    }
+  }
+}
+
+void open3_2(){
+  for(int i=0; i<brickHealth.length; i++){
+    for(int j=0; j<brickHealth.length; j++){
+      if(walked[i][j]){
+        brickHealth[i][j] = 0;
+        continue;
+      }
+      if(i==9 && j==3) brickHealth[i][j] = 3;
+    }
+  }
+}
+
+void door3_2(){
+  for(int i=0; i<brickHealth.length; i++){
+    for(int j=0; j<brickHealth.length; j++){
+      if(brickHealth[9][3] == 0){
+        brickHealth[13][4] = 0;
+      }
+      if(i==13 && j==4) brickHealth[i][j] = 4;
+    }
   }
 }
 
 void limb3_1(){
   for(int i=0; i<brickHealth.length; i++){
               for(int j=0; j<brickHealth.length; j++){
+                  if(walked[i][j]){
+                    brickHealth[i][j] = 0;
+                    
+                    continue;
+                  }
+                
+                
                 if(i==4) {if(j==1 || j==10) brickHealth[i][j] = 8;}
                 if(i==6) {if(j==2 || j==12 || j==14) brickHealth[i][j] = 7;}
                 if(i==7 && j==9) brickHealth[i][j] = 7;
                 if(i==9 && j==1) brickHealth[i][j] = 8;
                 if(i==14 && j==14) brickHealth[i][j] = 8;
-                // open 
-                if(i==2 && j==10) brickHealth[i][j] = 3;
-                // door
-                if(i==11 && j==3) brickHealth[i][j] = 4;
               }
             }
 }
@@ -639,16 +748,19 @@ void limb3_1(){
 void limb3_2(){
   for(int i=0; i<brickHealth.length; i++){
               for(int j=0; j<brickHealth.length; j++){
+                  if(walked[i][j]){
+                    brickHealth[i][j] = 0;
+                    
+                    continue;
+                  
+                }
+                
                 if(i==1 && j==1) brickHealth[i][j] = 8;
                 if(i==6 && j==14) brickHealth[i][j] = 7;
                 if(i==8 && j==6) brickHealth[i][j] = 7;
                 if(i==9) {if(j==1 || j==13) brickHealth[i][j] = 8;}
                 if(i==10 && j==3) brickHealth[i][j] = 8;
                 if(i==11) {if(j==5 || j==14) brickHealth[i][j] = 7;}
-                // open
-                if(i==9 && j==3) brickHealth[i][j] = 3;
-                // door
-                if(i==13 && j==4) brickHealth[i][j] = 4;
               }
             }
 }
